@@ -1,0 +1,210 @@
+short，byte，char运算时会先转成int，结果也为int
+
+在给变量进行赋值时，如果右侧的表达式中的量全是常量，没有任何变量，那么编译器javac将会直接将若干
+个常量表达式计算得到结果：short result = 5 + 8；直接就是short result = 13；
+
+而short result = a + b；就不同a和b先转为int，结果也是int result而不是short result
+
+switch（括号里只能是byte，short，char，int，String，enum枚举）
+
+== 对引用型来说是进行地址的比较
+
+equal方法时，常量最好写前面。
+
+static修饰变量时，该变量属于类而不属于对象，为对象所共有
+static修饰成员方法，该方法变成静态方法，静态方法不属于
+对象，而属于类
+如果没有static关键字，那么必须首先创建对象，然后通过对象
+才能使用它。
+无论是成员变量，还是成员方法，如果有了static，都推荐使用
+类名称进行调用。因为即使使用对象.静态，还是会翻译成类.静态
+
+静态变量：类名称.静态变量
+静态方法：类名称.静态方法（）
+
+静态不能直接访问非静态：因为在内存中是先有的静态内容，
+后有的非静态内容。
+	
+
+静态方法中不能使用this：this代表当前对象，通过谁调用的方法
+谁就是当前对象。因为调用静态方法/变量不用对象参与，所以
+用this就矛盾。
+
+静态代码块：static{  代码   }
+特点：当第一次用到本类时，静态代码块执行唯一的一次。
+静态内容总是优先于非静态，所以静态代码块比构造方法先执行。
+
+接口interface的默认方法public default void 名（）会被实现类自动继承
+
+如果实现类没有实现所有接口中的抽象方法，那么这个实现类必须是抽象类
+
+实现类所实现的多个接口中有冲突的默认方法，就要重写该默认方法
+
+一个类既有父类又实现接口，若父类和接口有冲突的方法，优先使用父类中的方法。
+
+一个类只能有一个父类，而一个接口则可以有多个父接口，接口的多继承。
+
+多父接口中默认方法冲突，则子接口必须重写该默认方法。
+
+直接通过对象名称访问成员变量：看等号左边是谁，优先用谁，没有则向上找。
+简介通过成员方法访问成员变量：看该方法属于谁，优先用谁，没有则向上找。
+因为成员变量不能进行重写，而方法可重写。
+访问方法: 看new的是谁，就优先用谁，没有则向上找。
+
+口诀：
+成员方法：编译看左边，运行看右边。
+成员变量：编译看左边，运行看左边。
+
+
+向上转型：Animal animal = new Cat();
+向下转型：Cat cat = （Cat）animal;即相当于重新转换成子类，转成别的类会报错。
+
+final修饰的类不能被继承，即太监类
+修饰的方法不能被覆盖，不能是抽象方法
+修饰变量，值不能变
+
+对成员变量来说，如果使用final关键字修饰，那么这个变量也照样是不可变。
+
+1.由于成员变量具有默认值，所以用了final之后必须手动赋值，不会再给默认值。
+2.对于final的成员变量，要么直接赋值，要么通过构造方法赋值，二选一
+3.必须保证类当中所有重载的构造方法，都最终会对final的成员变量进行赋值。
+
+内部类：Body.Heart heart = new Body（）.new Heart();
+
+1.外部类（最外层）：public、（default）
+2.成员内部类：public，protected，（default），private
+3.局部内部类：什么都不写
+
+局部内部类只能在本方法中使用
+
+
+集合不使用泛型，则默认类型就是object类型
+泛型
+public static <E> void 方法名（arraylist<E> 参数）{  }
+	好处：
+	1、避免了类型转换的麻烦，存储的是什么类型，去除的就是什么类型
+	2、把运行期异常（代码运行之后会抛出的异常），提升到了编译器
+·
+泛型通配符<?>，在方法参数列表中，当泛型不定，用<?>
+<? extends Number 此时泛型？必须是Number类型或其子类
+<? super Number此时泛型？必须是Number类型或其父类
+
+
+ArrayList集合是数组结构查询快，增删慢
+
+LinkedList是链表结构，查询慢，增删快
+创建LinkedList集合不能用多态，内置方法多 
+
+List方法与set方法的区别
+（1）重复对象
+list方法可以允许重复的对象，而set方法不允许重复对象
+
+（2）null元素
+list可以插入多个null元素，而set只允许插入一个null元素
+
+（3）容器是否有序
+list是一个有序的容器，保持了每个元素的插入顺序。即输出顺序就是输入顺序，
+而set方法是无序容器，无法保证每个元素的存储顺序，
+TreeSet通过 Comparator 或者 Comparable 维护了一个排序顺序
+
+Set接口特点：
+1、不允许存储重复的元素
+2、没有索引，没有带索引的方法，也不能使用普通的for循环遍历
+
+Set接口的实现类HashSet的特点：
+1不允许存储重复的元素
+2没有索引，没有带索引的方法，也不能使用普通的for循环遍历
+3、是一个无序的集合，存储元素和取出元素的顺序有可能不一致
+4、底层是一个哈希表结构（查询的速度非常的快）
+可用迭代器遍历
+Iterator<Integer> it = set.iterator（）；
+while（it.hasNext（））{
+Integer n = it.next（）；
+}
+可用增强for循环遍历set集合
+
+哈希表：
+当数据一个哈希值下的数据超过八位，数据结构从链表变成红黑树
+
+重写toString和hashCode方法
+用HashSet集合存储自定义元素必须重写hashCode和equals方法
+以保证属性相同的对象只能存储一次，如同名同年龄的人
+
+
+HashSet无序   LinkedHashSet有序
+
+可变参数  （int...arr）
+注意：
+1、一个方法的参数列表只能有一个可变参数
+2、如果方法的参数有多个，那么可变参数必须卸载参数列表的末尾
+
+
+Collections.addAll(集合，元素）向集合中添加所有元素
+Collections.shuffle(集合)  打乱集合
+Collections.sort(集合) 升序排列
+注意： sort(List(T) List）使用前提
+	被排序的集合里边存储的元素，必须实现Comparable接口，重写接口中的方法
+
+Collections.sort(集合,Comparator<? super )
+
+Comparator和Comparable的区别
+Comparable：自己（this）和别人（参数）比较，自己需要实现Comparable接口，重写比较规则compareTo方法
+Comparator：相当于找一个第三方的裁判，比较两个参数
+
+Comparator的排序规则：o1 - o2：升序，反之降序
+
+
+charAt（n）取出字符串第n个字符
+
+Map集合的特点：
+1、Map集合是一个双列集合，一个元素包含两个值（一个key，一个value）
+2、Map集合中的元素，key和value的数据类型可以相同，也可以不同
+3、Map集合中的元素，key是不允许重复的，value是可以重复的
+4、Map集合中的元素，key和value是一一对应的
+
+HashMap集合的特点：
+1、HashMap集合底层是哈希表，查询速度快
+	JDK1.8之前：数组+单向链表
+	JDK1.8之后：数组+单向链表/红黑树（链表长度超过8）：提高查询速度
+2、HashMap集合是一个无序的集合，存储元素和取出元素的顺序有可能不一致
+
+LinkedHashMap的特点：
+1、LinkedHashMap集合底层是哈希表+链表（保证迭代的顺序）
+2、LinkedHashMap集合是一个有序的集合，存储元素和取出元素的顺序是一致的
+
+Map集合创建： Map<String,String> map = new HashMap();
+方法： public V put（K key，V value）：把指定的键与指定的值添加到map集合中。
+返回值：v
+	存储键值对的时候，key不重复，返回值V是null
+	存储键值对时，key重复，会使用新的value替换map中重复的value，返回被替换的value值
+
+public V remove（Object key）：把指定的键所对应的键值对元素在map集合中删除
+返回值：V
+	key存在，v返回被删除的值
+	key不存在，v返回null
+
+public V get（Object）
+
+boolean containsKey（Object key）判断集合中是否包含key
+
+遍历键值对
+1、使用map集合中的方法keySet（），把map集合所有的键取出来，存储到一个Set集合中
+Set<String> set = map.keySet();
+2、遍历set集合，获取Map集合中的每一个key
+	使用迭代器遍历、使用增强for循环遍历
+3、使用Map.Entry
+	Map.Entry<K,V>:在Map接口中有一个内部接口Entry
+	作用：当Map集合一创建，那么就会在Map集合中创建一个Entry对象，用来记录键与值--->结婚证
+	Set<Map.Entry<K,V>> entrySet() : 把Map集合内部的多个Entry对象取出来存储到一个Set集合中，遍历Set集合，获取Set集合中的每一个Entry对象，再使用Entry接口中的方法getKey（）获取key，getValue（）获取值。
+
+HashMap存储自定义类型键值
+key：Person类型
+	Person类就必须重写hashCode方法和equal方法以保证key唯一
+
+HashMap  有序，，，LinkedHashMap  无序
+
+Hashtable：底层也是一个哈希表，是一个线程安全的集合，是单线程集合，速度慢
+HashMap：底层是一个哈希表，是一个线程不安全的集合，是多线程的集合，速度快
+
+HashMap集合：可存储null键值
+Hashtable集合，不能
