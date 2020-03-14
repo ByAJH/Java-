@@ -53,7 +53,7 @@
 >     构造方法的作用：
 >>     1、创建一个FileOutputStream对象
 >>     2、把FileInputStream对象指定到构造方法中要读取的文件
-### 读取数据的原理（硬盘->内存）
+* 读取数据的原理（硬盘->内存）
 * java程序--->JVM--->OS--->OS调用读数据方法--->读取文件
 * 字节输入流的使用步骤（重点）
 >     1、创建一个FileOutputStream对象，构造方法中绑定要读取的数据源
@@ -110,7 +110,7 @@
 >>     1、创建一个FileWriter对象
 >>     2、根据构造方法中传递的文件或其路径创建一个文件
 >>     3、创建好的FileWriter对象指向该文件
-* 字符输入流的使用步骤（重点）
+* 字符输出流的使用步骤（重点）
 >     1、创建一个FileWriter对象，构造方法中绑定要写入的数据目的地
 >     2、调用FileWriter的方法write，把数据写入到内存缓冲区中（字符转换为字节的过程）
 >     3、使用FileWriter的方法flush，把内存缓冲区中的数据，刷新到文件中
@@ -138,5 +138,180 @@
 >>      B b = new B（）；
 >>      try（a，b）{可能会产生异常的代码}catch（异常类变量 变量名）{异常处理逻辑}
 >>      如果是流对象，try前面还是会有异常 
+## Properties集合 extends Hashtable，implements Map
+* Properties类表示了一个持久的属性集。Properties可保存在流中或从流中加载
+* Properties集合是一个唯一与IO流结合的集合
+* 可以使用Properties集合中的方法store，把集合中的临时数据，持久化写入到硬盘中存储
+>     void store(OutputStream out,String comments)
+>     void store(Writer writer,String comments)
+>     参数：
+>     OutputStream out：字节输出流，不能写入中文
+>     Writer writer：字符输出流，可以写中文
+>     String comments：注释，用来解释说明保存的文件是做什么用的，不能使用中文，会产生乱码，默认是Unicode编码，一般使用“”空字符串
+>     常用步骤：
+>     1. 创建Properties集合对象，添加数据
+>     2. 创建字节输出流/字符输出流，构造方法中绑定要输出的目的地
+>     3. 使用Properties集合中的方法store，把集合中的临时数据，持久写入到硬盘中
+>     4. 释放资源ts) 
+```
+  //代码示例
+public class Demo01Properties {
+public static void main(String[] args) throws IOException {
+show02();
+}
+
+public static void show02() throws IOException {
+//创建Properties集合对象，添加数据
+Properties p=new Properties();
+//使用Properties集合往集合里面添加数据
+p.setProperty("蛋挞", "egg tart");
+p.setProperty("泡芙", "puff");
+p.setProperty("tea with mike", "奶茶");
+//2.创建字节输出流/字符输出流，构造方法中绑定要输出的目的地
+FileWriter fw=new FileWriter("D://a.txt");
+//3.使用Properties集合中的方法store，把集合中的临时数据，持久写入到硬盘中
+p.store(fw, "save data");
+//4.释放资源
+fw.close();
+}
+```  
+* 可以使用properties集合中的方法load，把硬盘中保存的文件（键值对），读取到集合中使用
+>     void load(InputStream inStream)
+>     void load(Read reader)
+>     参数：
+>     InputStream inStream：字节输入流，不能读取含有中文的键值对
+>     Reader read：字符输入流，能读取含有中文的键值对
+>     使用步骤：
+>     1. 创建Properties集合对象
+>     2. 使用Properties集合对象中的方法load读取保存键值对的文件
+>     3. 遍历Properties集合
+>>      注意事项：
+>>      1. 存储键值对的文件中，键与值默认的连接符号可以使用=，空格（其它符号）
+>>      2. 存储键值对的文件中，可以使用#进行注释，被注释的键值对不会再被读取
+>>      3. 存储键值对的文件中，键与值默认都是字符串，不用再加引号
+```
+//代码示例
+public class Demo01Properties {
+public static void main(String[] args) throws IOException {
+show03();
+}
+
+public static void show03() throws IOException {
+//1.创建Properties集合对象
+Properties p=new Properties();
+//2.使用Properties集合中的方法load读取保存键值对的文件
+p.load(new FileReader("D://a.txt"));                                                               //匿名对象用完就释放
+//3.遍历Properties集合
+Set<String> set=p.stringPropertyNames();
+for(String key:set) {
+String value=p.getProperty(key);
+System.out.println(key+"="+value);
+}
+}}
+```
+
+
+* Properties属性列表中每个键及其对应值都是字符串。
+* Properties集合是一个双列结合，key和value默认都是字符串
+* 操作字符串的特有方法：
+>     Object setProperty（String key， String value）调用Hashtable的方法put
+>     String getProperty（String key）通过key找到value的值，此方法相当于Map集合中的get（key）方法
+>     Set<String> stringPrepertyNames()返回此属性列表中的键集，其中该键及其对应值是字符值，此方法相当于Map中的keyGet方法
+
+
+## 缓冲流：用于增强上述四种流
+* 在创建流对象时，会创建一个内置的默认大小的缓冲区数组，通过缓冲区读写，减少系统 IO 次数，从而提高读写的效率。
+### 字节缓冲流
+#### 字节缓冲输出流BufferedOutputStream
+>     成员方法
+>     public void close（）：关闭此输出流并释放与此流相关联的任何系统资源
+>     public void flush（）：刷新此输出流并强制任何缓冲的输出字节被写出
+>     public void write（byte[] b）：将b.length字节从指定的字节数组写入此输出流
+>>      如果写的第一个字节是正数（0-127），那么显示的时候会查询ASCII表
+>>      如果写的第一个字节是负数，那第一个字节会和第二个字节，两个字节组成一个中文显示，查询系统默认码表（GBK）
+>     public void write（byte[] b，int off，int len）：从指定的字节数组写入len字节，从偏移量off开始输出到此输出流
+>>     把字节数组的一部分写入到文件中
+>>     off：数组的开始索引；len：写几个字节
+>     public abstract void write（int b）：将指定的字节输出流
+>     byte[] getBytes（） 把字符串转换为字节数组
+* 字节缓冲输出流BufferedOutputStream的构造方法
+>     public BufferedOutputStream(OutputStream out)创建一个新的缓冲输出流，以将数据写入指定的底层输出流。
+>     public BufferedOutputStream(OutputStream out， int size)创建一个新的缓冲输出流，以将具有指定缓冲区大小的数据写入指定的底层输出流
+>>      参数
+>>      OutputStream out：字节输出流，可传递FileOutputStream，缓冲流会给其增加一个缓冲区，提高其写入效率
+>>      int size：指定缓冲流内部缓冲区的大小，不指定则默认
+>>      使用步骤
+>>      1、创建FileOutputStream对象，构造方法中绑定要输出的目的地
+>>      2、创建BufferedOutputStream对象，构造方法中传递FileOutputStream对象，提高FileOutputStream效率
+>>      3、使用BufferedOutputStream对象中的方法write，把数据写入到内部缓冲区中
+>>      4、使用BufferedOutputStream对象中的额方法flush，把内部缓冲区中的数据刷新到文件中
+>>      5、释放资源（会先把内存缓冲区中的数据刷新到文件中）;第四步可省略
+#### 字节缓冲输入流 BufferedInputStream
+>     成员方法：
+>     int read（）从输入流中读取数据的下一个字节
+>     int read（byte[] b）从输入流中读取一定数量的字节，并将其存储在缓冲区数组b中
+>     void close（）：关闭此输入流并释放与此流相关联的任何系统资源
+*     字节缓冲输出流BufferedIntputStream的构造方法
+>     public BufferedInputStream(InputStream in)创建一个新的缓冲输入流，并保存其参数。
+>     public BufferedInputStream(InputStream in， int size)创建一个具有指定缓冲区大小的缓冲输入流，并保存其参数。
+>>      参数
+>>      InputStream out：字节输入流，可传递FileInputStream，缓冲流会给其增加一个缓冲区，提高其读取效率
+>>      int size：指定缓冲流内部缓冲区的大小，不指定则默认
+>>      使用步骤
+>>      1、创建FileInputStream对象，构造方法中绑定要输出的目的地
+>>      2、创建BufferedOutputStream对象，构造方法中传递FileInputStream对象，提高其效率
+>>      3、使用BufferedOutputStream对象中的方法read，把数据读取到内部缓冲区中
+>>      5、释放资源 ;
+### 字符缓冲流
+#### 字符缓冲输出流 BufferedWriter
+>     共性成员方法
+>>      void write（int c）写入单个字符
+>>      void write（char[] cbuf）一次写入多个字符到数组
+>>      abstract void write（char[] cbuf，int off，int len）写入字符数组的len个字符，从偏移量off开始输出到此输出流
+>>      void write（String str）写入字符串
+>>      void write（String str，int off，int len）写入字符串的len个字符，从偏移量off开始输出到此输出流
+>>      void flush（）刷新该流的缓冲
+>>      void close（）释放资源
+* 特有的成员方法
+>     void newLine（）写入一个行分隔符。会根据不同的操作系统，获取不同的行分隔符
+* 构造方法
+>     public BufferedWriter(Writer out)创建一个新的缓冲输出流，以将字符数据写入指定的底层输出流。
+>     public BufferedWriter(Writer out， int size)创建一个新的缓冲输出流，以将具有指定缓冲区大小的字符数据写入指定的底层输出流
+>>      参数
+>>      Writer out：字符输出流，可传递FileWriter，缓冲流会给其增加一个缓冲区，提高其写入效率
+>>      int size：指定缓冲流内部缓冲区的大小，不指定则默认
+>>      使用步骤
+>>      1、创建FileWriter对象，构造方法中绑定要输出的目的地
+>>      2、创建BufferedReader对象，构造方法中传递FileWriter对象，提高FileWriter效率
+>>      3、使用BufferedReader对象中的方法write，把数据写入到内部缓冲区中
+>>      4、使用BufferedReader对象中的额方法flush，把内部缓冲区中的数据刷新到文件中
+>>      5、释放资源（会先把内存缓冲区中的数据刷新到文件中）;第四步可省略
+#### 字符缓冲输入流 BufferedReader
+>     共性成员方法
+>>      int read（）读取单个字符并返回
+>>      int read（char[] cbuf）一次读取多个字符，将字符读入数组
+>>      void close（）释放资源
+* 特有成员方法
+>     String readLine（）读取一行数据，通过行终止符判断，返回值包含该行数据，不包含终止符，如读取之前就是流末尾，则返回null
+>     字符缓冲输出流BufferedReader的构造方法
+>     public BufferedReader(Reader in)创建一个新的缓冲输入流，并保存其参数。
+>     public BufferedReader(Reader in， int size)创建一个具有指定缓冲区大小的缓冲输入流，并保存其参数。
+>>      参数
+>>      Reader in：字节输入流，可传递FileReader，缓冲流会给其增加一个缓冲区，提高其读取效率
+>>      int size：指定缓冲流内部缓冲区的大小，不指定则默认
+>>      使用步骤
+>>      1、创建FileReader对象，构造方法中绑定要输出的目的地
+>>      2、创建BufferedReader对象，构造方法中传递FileReader对象，提高其效率
+>>      3、使用BufferedReader对象中的方法read/readLine读取文本，把数据读取到内部缓冲区中
+>>      5、释放资源 ;
+
+
+
+
+
+
+
+
+
 
 
