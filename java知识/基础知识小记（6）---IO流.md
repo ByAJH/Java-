@@ -319,11 +319,70 @@ System.out.println(key+"="+value);
 ## 由编码引出的问题
 * 在IDEA中，使用FileReader读取项目中的文本文件时，由于IDEA的设置，都是默认的UTF-8编码，所以没有任何问题。但是，当读取Windows系统中创建的文本文件时，由于Windows系统默认GBK编码，就会出现乱码
 ## 使用转换流解决编码问题
+* OutputStreamWriter:是字符流通向字节流的桥梁：可使用指定的charset将要写入流中的字符编码成字节。
+>     共性成员方法
+>>      void write（int c）写入单个字符
+>>      void write（char[] cbuf）一次写入多个字符到数组
+>>      abstract void write（char[] cbuf，int off，int len）写入字符数组的len个字符，从偏移量off开始输出到此输出流
+>>      void write（String str）写入字符串
+>>      void write（String str，int off，int len）写入字符串的len个字符，从偏移量off开始输出到此输出流
+>>      void flush（）刷新该流的缓冲
+>>      void close（）释放资源
+>     构造方法
+>>     OutputStreamWriter(OutputStream out)创建使用默认字符编码的 OutputStreamWriter。
+>>    OutputStreamWriter(OutputStream out, String charsetName) 创建使用指定字符集的 OutputStreamWriter。
+>     参数：
+>>  　　OutputStream out：字节输出流,可以用来写转换之后的字节到文件中
+>>　  　String charsetName：指定的编码表名称,不区分大小写,可以是utf-8/UTF-8,gbk/GBK,...不指定默认使用UTF-8
+>     使用步骤【重要】
+>>      1、创建OutputStreamWriter对象,构造方法中传递字节输出流和指定的编码表名称
+>>      2、使用OutputStreamWriter对象中的方法write,把字符转换为字节存储缓冲区中(编码)
+>>      3、使用OutputStreamWriter对象中的方法flush,把内存缓冲区中的字节刷新到文件中(使用字节流写字节的过程)
+>>      4、 释放资源
+```
+public static void main(String[] args) throws IOException {
+    //1.创建OutputStreamWriter对象,构造方法中传递字节输出流和指定的编码表名称
+    //OutputStreamWriter osw = new OutputStreamWriter(new FileOutputStream("E:\\utf_8.txt"),"utf-8");
+    OutputStreamWriter osw = new OutputStreamWriter(new FileOutputStream("E:\\utf_8.txt"));//不指定默认使用UTF-8
+    //2.使用OutputStreamWriter对象中的方法write,把字符转换为字节存储缓冲区中(编码)
+    osw.write("你好");
+    //3.使用OutputStreamWriter对象中的方法flush,把内存缓冲区中的字节刷新到文件中(使用字节流写字节的过程)
+    osw.flush();
+    //4.释放资源
+    osw.close();
+}
+```
+* InputStreamReader:是字符流通向字节流的桥梁：可使用指定的charset,读取字节并将其解码。
+>     共性成员方法
+>>      int read() 读取单个字符并返回。
+>>      int read(char[] cbuf)一次读取多个字符,将字符读入数组。
+>>      void close() 关闭该流并释放与之关联的所有资源。
+>     构造方法
+>>    InputStreamReader(InputStream in) 创建一个使用默认字符集的 InputStreamReader。
+>>    InputStreamReader(InputStream in, String charsetName) 创建使用指定字符集的 InputStreamReader。
+>     参数：
+>>  　　InputStream in：字节输入流，用来读取文件中保存的字节
+>>　  　String charsetName：指定的编码表名称,不区分大小写,可以是utf-8/UTF-8,gbk/GBK,...不指定默认使用UTF-8
+>     使用步骤【重要】
+>>      1、创建InputStreamReader对象,构造方法中传递字节输入流和指定的编码表名称
+>>      2、使用InputStreamReader对象中的方法read读取文件
+>>      3 、 释放资源
+>>      注意：构造方法中指定的编码表名称要和文件的编码相同,否则会发生乱码
+```
+public static void main(String[] args) throws IOException {
+         //1.创建InputStreamReader对象,构造方法中传递字节输入流和指定的编码表名称
+        //InputStreamReader isr = new InputStreamReader(new FileInputStream("E:\\gbk.txt"),"UTF-8");//???
+         //将匿名对象流中的字节流按照GBK进行解码为字符流
+         InputStreamReader isr = new InputStreamReader(new FileInputStream("E:\\gbk.txt"),"GBK");//你好
 
-
-
-
-
-
+         //2.使用InputStreamReader对象中的方法read读取文件
+        int len = 0;
+         while((len = isr.read())!=-1){
+            System.out.println((char)len);
+         }
+         //3.释放资源
+         isr.close(); 
+  }
+```
 
 
