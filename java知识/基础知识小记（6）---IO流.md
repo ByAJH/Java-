@@ -367,7 +367,7 @@ public static void main(String[] args) throws IOException {
 >>      1、创建InputStreamReader对象,构造方法中传递字节输入流和指定的编码表名称
 >>      2、使用InputStreamReader对象中的方法read读取文件
 >>      3 、 释放资源
->>      注意：构造方法中指定的编码表名称要和文件的编码相同,否则会发生乱码
+*      注意：构造方法中指定的编码表名称要和文件的编码相同,否则会发生乱码
 ```
 public static void main(String[] args) throws IOException {
          //1.创建InputStreamReader对象,构造方法中传递字节输入流和指定的编码表名称
