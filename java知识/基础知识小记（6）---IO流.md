@@ -329,11 +329,11 @@ System.out.println(key+"="+value);
 >>      void flush（）刷新该流的缓冲
 >>      void close（）释放资源
 >     构造方法
->>     OutputStreamWriter(OutputStream out)创建使用默认字符编码的 OutputStreamWriter。
->>    OutputStreamWriter(OutputStream out, String charsetName) 创建使用指定字符集的 OutputStreamWriter。
+>>      OutputStreamWriter(OutputStream out)创建使用默认字符编码的 OutputStreamWriter。
+>>      OutputStreamWriter(OutputStream out, String charsetName) 创建使用指定字符集的 OutputStreamWriter。
 >     参数：
->>  　　OutputStream out：字节输出流,可以用来写转换之后的字节到文件中
->>　  　String charsetName：指定的编码表名称,不区分大小写,可以是utf-8/UTF-8,gbk/GBK,...不指定默认使用UTF-8
+>>      OutputStream out：字节输出流,可以用来写转换之后的字节到文件中
+>>      String charsetName：指定的编码表名称,不区分大小写,可以是utf-8/UTF-8,gbk/GBK,...不指定默认使用UTF-8
 >     使用步骤【重要】
 >>      1、创建OutputStreamWriter对象,构造方法中传递字节输出流和指定的编码表名称
 >>      2、使用OutputStreamWriter对象中的方法write,把字符转换为字节存储缓冲区中(编码)
