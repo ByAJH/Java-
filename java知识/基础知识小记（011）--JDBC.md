@@ -511,4 +511,411 @@ public static void main(String[] args) {
 }
 ```
 -------------------------
+## 数据库连接池
 
+1. 概念：其实就是一个容器（集合），存放数据库连接的容器
+   1. 当系统初始化好后，容器被创建，容器中会申请一些连接对象，当用户来访问数据库时，从容器中获取连接对象，用户访问完后，会将连接对象归还给容器。
+2. 好处：
+   1. 节约资源
+   2. 用户访问高效
+3. 实现：
+   1. 标准接口：DataSource     javax.sql包下的
+      1. 方法：
+         * 获取连接：getConnection（）
+         * 归还连接：Connection.close()   如果连接对象Connection是从连接池中获取的，那么调用Connection.close（）方法，则不会再关闭连接了。而是归还连接
+   2. 一般我们不去实现它，有数据库厂商来实现
+      1. C3P0：数据库连接池技术
+         1. 导入jar包（两个）：c3p0-0.9.5.2.jar和mchange-commons-java-0.2.12.jar
+         2. 定义配置文件
+            * 名称：c3p0.properties  或者 c3p0-config.xml
+            * 路径：直接将文件放在src目录下即可。
+         3. 创建核心对象  ： 数据库连接池对象  ComboPooledDataSource
+                  4. 获取连接：getConnection 
+      2. Druid：数据库连接池实现技术，由阿里巴巴提供的 
+         * 步骤：
+           1. 导入jar包  druid-1.0.9.jar
+           2. 定义配置文件：
+              1. 是properties形式的
+              2. 可以叫任意名称，可以放在任意目录下
+           3. 加载配置文件。properties
+           4. 获取数据库连接池对象：通过工厂类来获取   DruidDataSourceFactory
+           5. 获取连接：getConnection
+         * 定义工具类
+           1. 定义一个类   JDBCUtils
+           2. 提供静态代码块加载配置文件，初始化连接池对象
+           3. 提供方法
+              1. 获取连接方法：通过数据库连接池获取连接
+              2. 释放资源
+              3. 获取连接池的方法
+```java
+         public class C3P0Demo1 {
+
+public static void main(String[] args) throws SQLException {
+
+//1.创建数据库连接池对象
+DataSource ds  = new ComboPooledDataSource();
+//2. 获取连接对象
+Connection conn = ds.getConnection();
+
+//3. 打印
+System.out.println(conn);
+}
+}
+
+//另一个例子
+DataSource ds  = new ComboPooledDataSource();
+
+//2.获取连接
+
+for (int i = 1; i <= 11 ; i++) {
+    Connection conn = ds.getConnection();
+    System.out.println(i+":"+conn);
+
+    if(i == 5){
+        conn.close();//归还连接到连接池中
+    }
+}*/
+
+//testNamedConfig();
+}
+```
+
+```java
+public static void testNamedConfig() throws SQLException {
+
+// 1.1 获取DataSource，使用指定名称配置
+DataSource ds  = new ComboPooledDataSource("otherc3p0");
+//2.获取连接
+for (int i = 1; i <= 10 ; i++) {
+    Connection conn = ds.getConnection();
+    System.out.println(i+":"+conn);
+}
+}
+}
+```
+---------------
+
+---------------------------
+```java
+/**
+
+Druid演示
+*/
+public class DruidDemo {
+
+public static void main(String[] args) throws Exception {
+
+//1.导入jar包
+//2.定义配置文件
+//3.加载配置文件
+Properties pro = new Properties();
+InputStream is = DruidDemo.class.getClassLoader().getResourceAsStream("druid.properties");
+pro.load(is);
+//4.获取连接池对象
+DataSource ds = DruidDataSourceFactory.createDataSource(pro);
+//5.获取连接
+Connection conn = ds.getConnection();
+System.out.println(conn);
+}
+}
+
+```
+```java
+* 代码：
+        public class JDBCUtils {
+
+            //1.定义成员变量 DataSource
+            private static DataSource ds ;
+        
+            static{
+                try {
+                    //1.加载配置文件
+                    Properties pro = new Properties();
+                    pro.load(JDBCUtils.class.getClassLoader().getResourceAsStream("druid.properties"));
+                    //2.获取DataSource
+                    ds = DruidDataSourceFactory.createDataSource(pro);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        
+            /**
+             * 获取连接
+             */
+            public static Connection getConnection() throws SQLException {
+                return ds.getConnection();
+            }
+        
+            /**
+             * 释放资源
+             */
+            public static void close(Statement stmt,Connection conn){
+               /* if(stmt != null){
+                    try {
+                        stmt.close();
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                }
+        
+                if(conn != null){
+                    try {
+                        conn.close();//归还连接
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                }*/
+        
+               close(null,stmt,conn);
+            }
+        
+        
+            public static void close(ResultSet rs , Statement stmt, Connection conn){
+        
+        
+                if(rs != null){
+                    try {
+                        rs.close();
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                }
+        
+        
+                if(stmt != null){
+                    try {
+                        stmt.close();
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                }
+        
+                if(conn != null){
+                    try {
+                        conn.close();//归还连接
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        
+            /**
+             * 获取连接池方法
+             */
+        
+            public static DataSource getDataSource(){
+                return  ds;
+            }
+        
+        }
+
+//主函数
+public class DruidDemo2 {
+
+public static void main(String[] args) {
+
+/*
+ * 完成添加操作：给account表添加一条记录
+ */
+Connection conn = null;
+PreparedStatement pstmt = null;
+try {
+    //1.获取连接
+    conn = JDBCUtils.getConnection();
+    //2.定义sql
+    String sql = "insert into account values(null,?,?)";
+    //3.获取pstmt对象
+    pstmt = conn.prepareStatement(sql);
+    //4.给？赋值
+    pstmt.setString(1,"王五");
+    pstmt.setDouble(2,3000);
+    //5.执行sql
+    int count = pstmt.executeUpdate();
+    System.out.println(count);
+} catch (SQLException e) {
+    e.printStackTrace();
+}finally {
+    //6. 释放资源
+    JDBCUtils.close(pstmt,conn);
+}
+}
+}
+```
+
+## Spring JDBC
+
+* Spring框架对JDBC的简单封装。提供了一个JDBCTemplate对象简化JDBC的开发
+* 步骤：
+  1. 导入jar包
+  2. 创建JDBCTemplate对象。依赖于数据源DataSource
+     * JdbcTemplate    template = new JdbcTemplate（ds）；
+  3. 调用JdbcTemplate的方法来完成CRUD的操作
+     * update（）：执行DML语句。用于执行增删改语句
+     * queryForMap（）：查询结果将结果集封装为map集合
+       * 注意：这个方法查询的结果集长度只能是1
+     * queryForList（）：查询结果将结果集封装为List集合
+       * 注意：将每条记录封装成一个map集合，再将这些map集合装入list集合中  
+     * query（）：查询结果将结果集封装为JavaBean对象
+       * template.query（sql，new RowMapper<Object>（）{    }）
+       * template.query（sql，new BeanPropertyRowMapper<Object>（Object.class））
+     * queryForObject（）：查询结果将结果集封装为对象，执行一些聚合函数
+  4. 练习：
+     * 需求 
+       1. 修改1号数据某值为1000
+       2. 添加一条记录
+       3. 删除刚才添加的记录
+       4. 查询id为1的记录，将其封装为map集合
+       5. 查询所有记录
+       6. 查询所有记录，将其封装为list集合
+       7. 查询总记录数
+ 
+```java
+     public class JdbcTemplateDemo1 {
+
+public static void main(String[] args) {
+    //1.导入jar包
+    //2.创建JDBCTemplate对象
+    JdbcTemplate template = new JdbcTemplate(JDBCUtils.getDataSource());
+    //3.调用方法
+    String sql = "update account set balance = 5000 where id = ?";
+    int count = template.update(sql, 3);
+    System.out.println(count);
+}
+}
+
+
+ public class JdbcTemplateDemo2 {
+
+//Junit单元测试，可以让方法独立执行
+
+
+//1. 获取JDBCTemplate对象
+private JdbcTemplate template = new JdbcTemplate(JDBCUtils.getDataSource());
+/**
+ * 1. 修改1号数据的 salary 为 10000
+ */
+@Test
+public void test1(){
+
+    //2. 定义sql
+    String sql = "update emp set salary = 10000 where id = 1001";
+    //3. 执行sql
+    int count = template.update(sql);
+    System.out.println(count);
+}
+
+/**
+ * 2. 添加一条记录
+ */
+@Test
+public void test2(){
+    String sql = "insert into emp(id,ename,dept_id) values(?,?,?)";
+    int count = template.update(sql, 1015, "郭靖", 10);
+    System.out.println(count);
+
+}
+
+/**
+ * 3.删除刚才添加的记录
+ */
+@Test
+public void test3(){
+    String sql = "delete from emp where id = ?";
+    int count = template.update(sql, 1015);
+    System.out.println(count);
+}
+
+/**
+ * 4.查询id为1001的记录，将其封装为Map集合
+ * 注意：这个方法查询的结果集长度只能是1
+ */
+@Test
+public void test4(){
+    String sql = "select * from emp where id = ? or id = ?";
+    Map<String, Object> map = template.queryForMap(sql, 1001,1002);
+    System.out.println(map);
+    //{id=1001, ename=孙悟空, job_id=4, mgr=1004, joindate=2000-12-17, salary=10000.00, bonus=null, dept_id=20}
+
+}
+
+/**
+ * 5. 查询所有记录，将其封装为List
+ */
+@Test
+public void test5(){
+    String sql = "select * from emp";
+    List<Map<String, Object>> list = template.queryForList(sql);
+
+    for (Map<String, Object> stringObjectMap : list) {
+        System.out.println(stringObjectMap);
+    }
+}
+
+/**
+ * 6. 查询所有记录，将其封装为Emp对象的List集合
+ */
+
+@Test
+public void test6(){
+    String sql = "select * from emp";
+    List<Emp> list = template.query(sql, new RowMapper<Emp>() {
+
+        @Override
+        public Emp mapRow(ResultSet rs, int i) throws SQLException {
+            Emp emp = new Emp();
+            int id = rs.getInt("id");
+            String ename = rs.getString("ename");
+            int job_id = rs.getInt("job_id");
+            int mgr = rs.getInt("mgr");
+            Date joindate = rs.getDate("joindate");
+            double salary = rs.getDouble("salary");
+            double bonus = rs.getDouble("bonus");
+            int dept_id = rs.getInt("dept_id");
+
+            emp.setId(id);
+            emp.setEname(ename);
+            emp.setJob_id(job_id);
+            emp.setMgr(mgr);
+            emp.setJoindate(joindate);
+            emp.setSalary(salary);
+            emp.setBonus(bonus);
+            emp.setDept_id(dept_id);
+
+            return emp;
+        }
+    });
+
+
+    for (Emp emp : list) {
+        System.out.println(emp);
+    }
+}
+
+/**
+ * 6. 查询所有记录，将其封装为Emp对象的List集合
+ */
+
+@Test
+public void test6_2(){
+    String sql = "select * from emp";
+    List<Emp> list = template.query(sql, new BeanPropertyRowMapper<Emp>(Emp.class));
+    for (Emp emp : list) {
+        System.out.println(emp);
+    }
+}
+
+/**
+ * 7. 查询总记录数
+ */
+
+@Test
+public void test7(){
+    String sql = "select count(id) from emp";
+    Long total = template.queryForObject(sql, Long.class);
+    System.out.println(total);
+}
+}
+```
+-----------------------------
