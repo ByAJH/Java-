@@ -153,3 +153,70 @@
     * 当所有sql都执行完提交事务
   * 回滚事务：rollback（）
     * 在catch中回滚事务
+* * * 
+
+-------------------------
+
+## 数据库连接池
+
+1. 概念：其实就是一个容器（集合），存放数据库连接的容器
+   1. 当系统初始化好后，容器被创建，容器中会申请一些连接对象，当用户来访问数据库时，从容器中获取连接对象，用户访问完后，会将连接对象归还给容器。
+2. 好处：
+   1. 节约资源
+   2. 用户访问高效
+3. 实现：
+   1. 标准接口：DataSource     javax.sql包下的
+      1. 方法：
+         * 获取连接：getConnection（）
+         * 归还连接：Connection.close()   如果连接对象Connection是从连接池中获取的，那么调用Connection.close（）方法，则不会再关闭连接了。而是归还连接
+   2. 一般我们不去实现它，有数据库厂商来实现
+      1. C3P0：数据库连接池技术
+         1. 导入jar包（两个）：c3p0-0.9.5.2.jar和mchange-commons-java-0.2.12.jar
+         2. 定义配置文件
+            * 名称：c3p0.properties  或者 c3p0-config.xml
+            * 路径：直接将文件放在src目录下即可。
+         3. 创建核心对象  ： 数据库连接池对象  ComboPooledDataSource
+         4. 获取连接：getConnection 
+      2. Druid：数据库连接池实现技术，由阿里巴巴提供的 
+         * 步骤：
+           1. 导入jar包  druid-1.0.9.jar
+           2. 定义配置文件：
+              1. 是properties形式的
+              2. 可以叫任意名称，可以放在任意目录下
+           3. 加载配置文件。properties
+           4. 获取数据库连接池对象：通过工厂类来获取   DruidDataSourceFactory
+           5. 获取连接：getConnection
+         * 定义工具类
+           1. 定义一个类   JDBCUtils
+           2. 提供静态代码块加载配置文件，初始化连接池对象
+           3. 提供方法
+              1. 获取连接方法：通过数据库连接池获取连接
+              2. 释放资源
+              3. 获取连接池的方法
+
+## Spring JDBC
+
+* Spring框架对JDBC的简单封装。提供了一个JDBCTemplate对象简化JDBC的开发
+* 步骤：
+  1. 导入jar包
+  2. 创建JDBCTemplate对象。依赖于数据源DataSource
+     * JdbcTemplate    template = new JdbcTemplate（ds）；
+  3. 调用JdbcTemplate的方法来完成CRUD的操作
+     * update（）：执行DML语句。用于执行增删改语句
+     * queryForMap（）：查询结果将结果集封装为map集合
+       * 注意：这个方法查询的结果集长度只能是1
+     * queryForList（）：查询结果将结果集封装为List集合
+       * 注意：将每条记录封装成一个map集合，再将这些map集合装入list集合中  
+     * query（）：查询结果将结果集封装为JavaBean对象
+       * template.query（sql，new RowMapper<Object>（）{    }）
+       * template.query（sql，new BeanPropertyRowMapper<Object>（Object.class））
+     * queryForObject（）：查询结果将结果集封装为对象，执行一些聚合函数
+  4. 练习：
+     * 需求 
+       1. 修改1号数据某值为1000
+       2. 添加一条记录
+       3. 删除刚才添加的记录
+       4. 查询id为1的记录，将其封装为map集合
+       5. 查询所有记录
+       6. 查询所有记录，将其封装为list集合
+       7. 查询总记录数
